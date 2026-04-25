@@ -21,23 +21,7 @@ Getting an LLM to argue a position is trivial. Getting it to:
  
 ## Architecture Overview
  
-The system is organized into three layers, each building on the last.
- 
-```
-┌─────────────────────────────────────────────┐
-│           3. Evaluation & Reliability       │
-│  Scoring · Hallucination · Contradiction    │
-│  Adversarial Injection · Metrics Dashboard  │
-├─────────────────────────────────────────────┤
-│              2. Debate System               │
-│  Topic Framing · Evidence RAG · Argument    │
-│  Graph · Convergence Detection              │
-├─────────────────────────────────────────────┤
-│           1. Core Reasoning Engine          │
-│  Multi-Agent Loop · Structured Arguments    │
-│  Iterative Rounds · Memory & Context        │
-└─────────────────────────────────────────────┘
-```
+Refer to [Architecture document](/docs/architecture.md)
  
 ---
  
@@ -97,18 +81,6 @@ The user provides a question and optional supporting documents. The system conve
 ### Evidence Integration
  
 This is the key technical differentiator. Agents are not allowed to assert facts — they must retrieve them. Evidence is pulled via RAG over user-provided documents or curated corpora. Each claim is linked to a source, and source reliability is tracked as a first-class metric.
- 
-### Argument Graph
- 
-The debate is represented as a directed graph, not a linear transcript:
- 
-```
-Claim A ──── supports ───► Claim B
-    │                         │
-    └──── challenged by ──► Rebuttal C ──── ignored by ──► Claim D (flagged)
-```
- 
-This structure makes it possible to visualize the actual reasoning topology, identify dead ends, and trace which arguments drove the final outcome.
  
 ### Convergence Detection
  
