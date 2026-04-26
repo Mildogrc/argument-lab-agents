@@ -14,7 +14,7 @@ def test_argument_requires_evidence():
             counterpoints_addressed=[],
             confidence_score=0.9
         )
-    assert "at least 1" in str(exc_info.value) or "min_length" in str(exc_info.value) or "At least 1" in str(exc_info.value)
+    assert "at least 1" in str(exc_info.value).lower() or "min_length" in str(exc_info.value).lower()
 
 def test_valid_argument():
     ev = EvidenceRef(source_id="doc_1", excerpt="AI helps.", reliability_score=0.8)
