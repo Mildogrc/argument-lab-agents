@@ -27,18 +27,17 @@ from argument_lab.core.state import DebateState, MAX_ROUNDS
 def start_round(state: DebateState) -> dict:
     """
     Passthrough node that acts as the fan-out point at the start of each
-    round. Returning an empty dict leaves all state fields unchanged.
+    round. Returns the current round to satisfy LangGraph's update requirement.
     """
-    return {}
+    return {"current_round": state.get("current_round", 1)}
 
 
 def graph_update(state: DebateState) -> dict:
     """
-    Fan-in point after all three evaluation nodes complete. Currently a
-    passthrough — in v2 this is where the argument graph (NetworkX) gets
-    updated from the accumulated state before routing is decided.
+    Fan-in point after all three evaluation nodes complete.
+    Returns the current round to satisfy LangGraph's update requirement.
     """
-    return {}
+    return {"current_round": state.get("current_round", 1)}
 
 
 # ---------------------------------------------------------------------------
@@ -110,7 +109,7 @@ def build_graph(retriever: Retriever):
     workflow.add_node("opponent", make_opponent_node(retriever))
 
     # Passthrough fan-in/fan-out between agent round and evaluation round
-    workflow.add_node("start_evaluation", lambda state: {})
+    workflow.add_node("start_evaluation", lambda state: {"current_round": state.get("current_round", 1)})
 
     # Evaluation nodes — all three run in parallel
     workflow.add_node("judge", judge_node)

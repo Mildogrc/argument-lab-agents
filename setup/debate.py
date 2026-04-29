@@ -323,33 +323,34 @@ def main() -> None:
     current_round_printed = 0
     final_state: DebateState | None = None
 
-    for node_name, update in debate_graph.stream(initial_state):
-        # Print round header when we first see a new round's arguments
-        new_args = update.get("arguments", [])
-        if new_args:
-            round_num = new_args[-1].round
-            if round_num != current_round_printed:
-                current_round_printed = round_num
-                print(f"\n{BOLD}{_hr()}{RESET}")
-                print(f"{BOLD}  ROUND {round_num}{RESET}")
-                print(f"{BOLD}{_hr()}{RESET}")
+    for chunk in debate_graph.stream(initial_state):
+        for node_name, update in chunk.items():
+            # Print round header when we first see a new round's arguments
+            new_args = update.get("arguments", [])
+            if new_args:
+                round_num = new_args[-1].round
+                if round_num != current_round_printed:
+                    current_round_printed = round_num
+                    print(f"\n{BOLD}{_hr()}{RESET}")
+                    print(f"{BOLD}  ROUND {round_num}{RESET}")
+                    print(f"{BOLD}{_hr()}{RESET}")
 
-        # Dispatch to per-node printers
-        if node_name in ("proponent", "opponent"):
-            _print_agent_update(node_name, update)
-        elif node_name == "judge":
-            _print_judge_update(update)
-        elif node_name == "hallucination_check":
-            _print_hallucination_update(update)
-        elif node_name == "contradiction_check":
-            _print_contradiction_update(update)
+            # Dispatch to per-node printers
+            if node_name in ("proponent", "opponent"):
+                _print_agent_update(node_name, update)
+            elif node_name == "judge":
+                _print_judge_update(update)
+            elif node_name == "hallucination_check":
+                _print_hallucination_update(update)
+            elif node_name == "contradiction_check":
+                _print_contradiction_update(update)
 
-        # Accumulate the last known full state
-        # LangGraph's stream() yields (node_name, state_delta) tuples;
-        # the final full state is available via invoke() but we reconstruct
-        # it from the last graph_update node output which holds the full state.
-        if node_name == "graph_update":
-            final_state = update  # graph_update passthrough holds full state
+            # Accumulate the last known full state
+            # LangGraph's stream() yields (node_name, state_delta) tuples;
+            # the final full state is available via invoke() but we reconstruct
+            # it from the last graph_update node output which holds the full state.
+            if node_name == "graph_update":
+                final_state = update  # graph_update passthrough holds full state
 
     # Fallback: run invoke() to guarantee we have the final state
     if final_state is None or "proposition" not in final_state:
