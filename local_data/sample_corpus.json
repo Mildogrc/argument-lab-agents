@@ -1,0 +1,82 @@
+[
+  {
+    "title": "McKinsey Global Institute — The Economic Potential of Generative AI (2023)",
+    "chunks": [
+      "Generative AI could add between $2.6 trillion and $4.4 trillion annually across 63 use cases analyzed. Customer operations, marketing and sales, software engineering, and R&D account for roughly 75% of this total potential value.",
+      "Legacy IT systems represent one of the most significant structural barriers to AI adoption in large enterprises. Organizations with fragmented, siloed data architectures report 40–60% longer AI deployment timelines than those operating on modernized infrastructure.",
+      "The total cost of maintaining legacy infrastructure in financial services, insurance, and telecommunications averages 70–80% of annual IT budgets, leaving limited capital available for AI investment or experimentation.",
+      "Enterprises that completed cloud migration and data platform modernization before beginning AI adoption report 2.5x higher rates of successful AI deployment at scale compared to those attempting AI on top of legacy stacks.",
+      "AI-driven automation could affect 60–70% of employees' time across occupations. The near-term impact is primarily augmentation rather than full replacement — workers shift toward higher-judgment tasks while AI handles routine processing.",
+      "Technical debt in legacy systems compounds over time. Organizations that defer modernization face transition costs that grow at an estimated 15–20% annually, making earlier action significantly cheaper in present-value terms.",
+      "Cyber vulnerabilities in legacy systems account for 72% of critical infrastructure incidents reported to CISA in 2022. AI-native architectures with continuous monitoring and automated patch management reduce this attack surface structurally.",
+      "The productivity gains from AI are not uniformly distributed. Organizations in the top quartile of AI maturity — characterized by clean data infrastructure, strong MLOps practices, and executive alignment — capture 3–4x more value than median adopters.",
+      "Industries with the highest proportions of legacy infrastructure — banking, insurance, and utilities — also face the greatest competitive threat from AI-native entrants who do not carry the same technical debt burden."
+    ]
+  },
+  {
+    "title": "Harvard Business Review — Why AI Transformations Fail (2023)",
+    "chunks": [
+      "More than 80% of enterprise AI projects fail to reach production. The most commonly cited root causes are data quality issues, misaligned organizational incentives, and insufficient change management — not algorithmic or model limitations.",
+      "Big-bang infrastructure replacement projects have a 70% failure rate in large enterprises, driven by scope creep, budget overruns, and organizational change fatigue. Incremental modernization strategies succeed at nearly twice the rate of full replacements.",
+      "Replacing legacy infrastructure destroys tacit operational knowledge that staff have accumulated over years or decades. This knowledge is rarely captured in documentation and is consistently underestimated during migration planning.",
+      "Organizations that attempt full legacy replacement simultaneously with major AI deployment report a compounding failure rate. Technical complexity and organizational disruption interact to derail both initiatives at once.",
+      "Middleware and API abstraction layers — so-called 'strangler fig' patterns — can expose legacy system capabilities to AI tools without requiring full replacement. This approach achieves 60–80% of the productivity gains at a fraction of the transition cost and risk.",
+      "The average enterprise AI transformation requires 3–5 years to generate measurable ROI. Executive and board impatience with this timeline is one of the leading causes of premature program cancellation before value is captured.",
+      "Vendor lock-in risk is acute in AI infrastructure decisions. Organizations that build on proprietary AI cloud platforms report significantly higher switching costs and reduced negotiating leverage when performance expectations are not met.",
+      "Staff resistance to AI adoption correlates more strongly with the disruption caused by infrastructure change than with the AI systems themselves. Employees in organizations that retained familiar workflows while layering AI on top report higher adoption rates and satisfaction.",
+      "The business case for legacy replacement is frequently overstated. Consulting-led transformation programs have a documented pattern of front-loading projected benefits while deferring transition risks and costs to later project phases."
+    ]
+  },
+  {
+    "title": "Gartner — IT Modernization and AI Readiness Report (2024)",
+    "chunks": [
+      "By 2026, Gartner projects that 75% of enterprises will have deployed AI in at least one major business function, but fewer than 30% will have achieved AI readiness at the underlying infrastructure level.",
+      "The true cost of full legacy replacement must account for hidden transition expenses: data migration, staff retraining, regulatory re-certification, parallel system operation, and a productivity dip averaging 12–18 months during the transition period.",
+      "AI systems require clean, labeled, high-volume, and continuously updated data. Legacy systems frequently store data in proprietary formats, on-premises databases, and siloed line-of-business applications that are structurally incompatible with modern ML pipelines.",
+      "Organizations in regulated industries — banking, healthcare, energy, and utilities — face additional constraints on infrastructure modernization, including regulatory approval processes that can extend transition timelines by 2–4 years beyond private-sector peers.",
+      "A hybrid architecture strategy, in which AI capabilities are layered incrementally on top of selectively modernized legacy components, is rated as the most pragmatic approach by 68% of enterprise CIOs surveyed in Gartner's 2024 CIO Agenda study.",
+      "Technical staff attrition accelerates during major infrastructure transitions. Enterprises report 20–35% higher voluntary turnover among senior engineers during multi-year modernization programs, creating a dangerous knowledge drain at the moment institutional knowledge matters most.",
+      "AI-native companies that have never operated legacy infrastructure consistently outperform legacy-burdened incumbents on AI deployment speed, model iteration cycles, and data quality metrics — but also on unit economics, with AI-native firms spending 40% less per AI workload.",
+      "The gap between AI aspiration and AI readiness is widening. In Gartner's 2024 survey, 89% of enterprise leaders identified AI as a top-three strategic priority, but only 23% rated their data infrastructure as ready to support production AI at scale.",
+      "Composable architecture — building modular, API-first systems that can be assembled and reassembled — is emerging as the dominant post-legacy strategy, allowing organizations to retire legacy components gradually while maintaining operational continuity."
+    ]
+  },
+  {
+    "title": "MIT Sloan Management Review — Legacy Modernization Strategies (2023)",
+    "chunks": [
+      "The 'strangle the monolith' pattern — gradually replacing legacy components with microservices while keeping the core system operational — has emerged as the dominant risk-mitigation strategy for enterprises that cannot tolerate operational disruption during transition.",
+      "Organizations that fully replaced legacy ERP systems with AI-native alternatives reported an average productivity improvement of 23% over a three-year post-transition period, but also experienced an average of 14 months of disruption during and immediately after the migration.",
+      "Legacy systems often encode decades of undocumented business logic. AI systems trained on the outputs of these legacy systems may inadvertently perpetuate historical biases, regulatory workarounds, and operational inefficiencies embedded in the original design.",
+      "Cloud-native AI infrastructure enables elasticity, global distribution, and continuous model retraining at cost structures that are structurally unavailable to on-premises legacy architectures — a permanent competitive disadvantage for organizations that delay.",
+      "The risk of catastrophic failure during legacy migration is not evenly distributed across the project lifecycle. It is concentrated in the data migration phase, where data loss, corruption, or field-mapping errors can have irreversible downstream effects on model training and decision-making.",
+      "Companies that operate parallel legacy and AI-native systems during transition incur dramatically higher operational costs — typically 30–50% above steady-state — but report significantly lower rates of critical business disruption than organizations that pursue hard cutover strategies.",
+      "AI governance frameworks increasingly require full auditability of data lineage, model decisions, and system access logs. Many legacy systems cannot provide the provenance and logging capabilities that modern AI governance standards demand, creating regulatory exposure.",
+      "The productivity argument for legacy replacement is time-horizon dependent. On a 2-year horizon, replacement costs almost always exceed benefits. On a 7–10 year horizon, the compound productivity advantage of AI-native infrastructure typically justifies the investment.",
+      "Middle management resistance is a more reliable predictor of legacy modernization failure than technical complexity. Managers whose authority derives from expertise in legacy processes have structural incentives to delay transitions that would commoditize their knowledge."
+    ]
+  },
+  {
+    "title": "Brookings Institution — AI and the Future of Industrial Infrastructure (2024)",
+    "chunks": [
+      "The United States has an estimated $2.1 trillion in aging enterprise infrastructure across manufacturing, finance, healthcare, and logistics — much of it running on software platforms that predate the commercial internet and were not designed for data interoperability.",
+      "AI adoption in manufacturing has demonstrated measurable gains in predictive maintenance, yield optimization, and supply chain resilience. However, 61% of manufacturers report that sensor and control system incompatibility with modern data platforms is their primary barrier to scaling.",
+      "The national security implications of legacy infrastructure vulnerabilities are significant. Critical infrastructure sectors — energy grids, water systems, financial clearing networks — are disproportionately dependent on aging systems with known, unpatched vulnerabilities that AI-enhanced cyber attacks can exploit systematically.",
+      "Public-sector organizations face a distinct set of constraints on AI adoption: procurement rules, multi-year budget cycles, civil service hiring limitations, and political risk aversion create structural inertia that private-sector modernization timelines do not account for.",
+      "The environmental cost of maintaining legacy data center infrastructure is substantial. Legacy on-premises systems consume an estimated 3–5x more energy per compute unit than modern cloud infrastructure, a gap that widens as AI workloads increase in intensity.",
+      "Workforce displacement from AI-driven infrastructure modernization is not uniform across the economy. High-skill technical roles show strong net job growth; administrative, data entry, and routine processing roles show the steepest displacement, concentrated in regions already facing economic stress.",
+      "International competitiveness data shows that countries with higher rates of enterprise infrastructure modernization — South Korea, Singapore, Estonia — also show faster AI productivity growth, suggesting infrastructure readiness is a macroeconomic variable, not just a firm-level one."
+    ]
+  },
+  {
+    "title": "IEEE Transactions on Software Engineering — Technical Debt and AI Readiness (2023)",
+    "chunks": [
+      "Technical debt is not a binary condition. The IEEE Software Engineering Body of Knowledge classifies it across four dimensions: code debt, data debt, architectural debt, and test debt. AI readiness requires addressing all four — organizations that modernize code while leaving data debt unresolved consistently fail to deploy AI at scale.",
+      "COBOL-based systems still process an estimated $3 trillion in daily transactions in the global banking system. The average age of a production COBOL application is 43 years. Replacing these systems introduces operational risk that quantitatively exceeds the risk of continuing to operate them for most institutions.",
+      "The 'rewrite from scratch' anti-pattern in software engineering is well-documented. Systems built from scratch to replace working legacy software have a higher defect rate in the first 3 years of operation than the systems they replaced, due to the loss of implicit correctness encoded in the legacy codebase.",
+      "Containerization and API-first design patterns allow AI inference services to be deployed alongside legacy systems without requiring full replacement. This architectural pattern, sometimes called 'AI wrapping,' has shown 70–85% of the performance gains of full replacement at 20–30% of the cost in case studies across financial services.",
+      "Data schema drift — the gradual divergence between how a system stores data and what downstream consumers expect — is the most common technical failure mode in AI deployments on legacy infrastructure. Without schema versioning and data contracts, AI models trained on historical data rapidly become miscalibrated.",
+      "The empirical evidence on microservices migrations is mixed. Organizations with fewer than 500 engineers show no statistically significant productivity gain from microservices architecture over well-maintained monoliths. The benefits of microservices are realized primarily at organizational scale, not technical scale.",
+      "AI model governance requires model versioning, data lineage tracking, and reproducible training pipelines. Legacy infrastructure built before MLOps was a recognized discipline cannot support these requirements without significant re-engineering — creating a compliance gap that regulators are beginning to close."
+    ]
+  }
+]

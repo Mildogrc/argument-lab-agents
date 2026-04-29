@@ -3,6 +3,8 @@ import operator
 
 from argument_lab.core.models import Argument, Claim, JudgeEvaluation
 
+MAX_ROUNDS = 3
+
 def union_sets(a: set[str] | None, b: set[str] | None) -> set[str]:
     return (a or set()) | (b or set())
 
