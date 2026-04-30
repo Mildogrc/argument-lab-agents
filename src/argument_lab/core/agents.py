@@ -22,7 +22,7 @@ from langchain_openai import ChatOpenAI
  
 from argument_lab.core.models import Argument, Claim, EvidenceRef
 from argument_lab.core.retriever import Retriever, RetrieverError
-from argument_lab.core.state import DebateState
+from argument_lab.core.state import DebateState, MAX_ROUNDS
 from argument_lab.core.prompts import (
     QUERY_FORMULATION_SYSTEM,
     QUERY_FORMULATION_USER,
@@ -77,7 +77,7 @@ def _formulate_queries(
             "stance": stance,
             "history": history,
             "current_round": current_round,
-            "round_goal": ROUND_GOALS[min(current_round, 3)],
+            "round_goal": ROUND_GOALS[min(current_round, MAX_ROUNDS)],
         })
         queries = result.get("queries", [])
         if isinstance(queries, list) and all(isinstance(q, str) for q in queries):
@@ -134,7 +134,7 @@ def _generate_argument(
         "role": role,
         "stance": "FOR" if role == "Proponent" else "AGAINST",
         "proposition": proposition,
-        "counterpoint_rule": COUNTERPOINT_RULES[min(current_round, 3)],
+        "counterpoint_rule": COUNTERPOINT_RULES[min(current_round, MAX_ROUNDS)],
         "evidence_context": evidence_context,
     })
  
@@ -209,7 +209,7 @@ def _enforce_counterpoint_rule(
             "role": role,
             "stance": "FOR" if role == "Proponent" else "AGAINST",
             "proposition": proposition,
-            "counterpoint_rule": COUNTERPOINT_RULES[min(current_round, 3)],
+            "counterpoint_rule": COUNTERPOINT_RULES[min(current_round, MAX_ROUNDS)],
             "evidence_context": evidence_context,
         })),
         ("user", AGENT_USER_TEMPLATE.format_map({

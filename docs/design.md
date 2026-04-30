@@ -32,10 +32,16 @@ Implements the core LangGraph agent nodes. Both agents follow a strict, determin
 ### 4. `core/retriever.py` (RAG Interface)
 A thin abstraction over the vector database (e.g. FAISS). It exposes `retrieve_multi()` which aggregates search results for multiple queries and deduplicates them by `source_id`, guaranteeing the best chunks are surfaced to the agent.
 
-### 5. `core/prompts.py`
-Isolates all LangChain `ChatPromptTemplate` strings. It handles formatting debate histories and chunk excerpts, making it easy to iterate on prompt wording without touching workflow logic.
+### 5. `core/evaluation.py` (Parallel Evaluators)
+Contains the three concurrent evaluation nodes that run after the agents:
+- **`judge_node`**: Uses an LLM to score both arguments across four dimensions, detects convergence/stalemate, updates the debate `status`, and increments the round.
+- **`hallucination_check`**: Validates that cited sources explicitly support the claims. Appends failing claim IDs to `hallucination_flags`.
+- **`contradiction_check`**: Compares current arguments against the agent's historical claims to detect goalpost shifting. Appends offending claim IDs to `contradiction_flags`.
 
-### 6. `orchestrator/graph.py` (Workflow Topology)
+### 6. `core/prompts.py` & `core/eval_prompts.py`
+Isolate all LangChain `ChatPromptTemplate` strings. They handle formatting debate histories, chunk excerpts, and evaluation logic, making it easy to iterate on prompt wording without touching workflow logic.
+
+### 7. `orchestrator/graph.py` (Workflow Topology)
 This file compiles the `StateGraph` that controls the execution flow. It is heavily parallelized to reduce latency:
 - **Agent Fan-out**: The `start_round` node branches unconditionally to `proponent_node` and `opponent_node`, running them concurrently.
 - **Evaluation Sync & Fan-out**: Both agents join at a dummy node (`start_evaluation`). From there, the graph fans out again to three concurrent evaluation nodes: `judge_node`, `hallucination_check`, and `contradiction_check`.

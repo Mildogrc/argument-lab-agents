@@ -135,6 +135,50 @@ Tracked across every debate session:
 - Disagreement persistence across rounds
 ---
  
+## Getting Started
+
+### Prerequisites
+
+Ensure you have Python 3.10+ installed and set your OpenAI API key:
+
+```bash
+export OPENAI_API_KEY=sk-...
+```
+
+Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 1. Ingest Data
+
+Before running a debate, the agents need a retrieval corpus (FAISS index). ArgumentLab includes a sample corpus to get started instantly:
+
+```bash
+python setup/ingest_corpus.py --sample
+```
+
+You can also ingest your own `.txt` or `.pdf` documents:
+
+```bash
+python setup/ingest_corpus.py --docs path/to/your/documents/
+```
+
+### 2. Run a Debate
+
+Execute a full, structured debate by providing a proposition. The debate streams live to the console, printing argument blocks and judge scores round-by-round.
+
+```bash
+python setup/debate.py \
+    --proposition "Companies should replace legacy infrastructure with AI-driven systems." \
+    --session-id my_debate_001
+```
+
+Once finished, the debate state is automatically exported to `local_data/results/my_debate_001.json` and a human-readable `my_debate_001.md` report.
+
+---
+ 
 ## Demo Flow
  
 1. Input a real-world question (e.g., *"Should companies replace legacy infrastructure with AI-driven systems?"*)
