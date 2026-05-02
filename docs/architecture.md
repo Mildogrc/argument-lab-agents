@@ -30,7 +30,7 @@ Each layer is independently testable and builds on the outputs of the layer belo
 
 ## High-Level Architecture
 
-![High-Level Architecture](/docs/images/highlevelarchitecture.png)
+![High-Level Architecture](/docs/images/highlevelarch.png)
 
 ---
 
@@ -49,34 +49,22 @@ The system uses four agents with distinct, non-overlapping roles:
 
 Each agent is implemented as a stateless function that receives a context object and returns a structured argument. State is held externally in the Shared Debate State Manager.
 
-### Structured Argument Schema
+### Structured ReasonBench Schema
 
-Every agent output is a typed JSON object — no free-form prose:
+Every agent output must strictly conform to the `ReasonBenchResponse` JSON schema — no free-form prose:
 
 ```json
 {
-  "round": 2,
-  "agent": "proponent",
-  "claim": "string — the primary assertion being made",
-  "evidence": [
-    {
-      "source_id": "doc_42_chunk_7",
-      "excerpt": "string — relevant passage",
-      "reliability_score": 0.91
-    }
-  ],
-  "assumptions": ["string — unstated premises this argument depends on"],
-  "counterpoints_addressed": ["claim_id_from_prior_round"],
-  "confidence_score": 0.82,
-  "metadata": {
-    "timestamp": "ISO 8601",
-    "tokens_used": 412,
-    "retrieval_latency_ms": 230
-  }
+  "strategy_or_answer": "string — final answer or plan",
+  "rationale": "string — step-by-step reasoning",
+  "assumptions": ["string — explicit assumptions made"],
+  "opponent_model": "string — what the model believes about the opponent",
+  "risks": ["string — failure modes or weaknesses"],
+  "conditions": ["string — when the answer/strategy would change"]
 }
 ```
 
-This schema is enforced at the orchestrator level. Arguments that fail schema validation are rejected and the agent is re-prompted.
+This schema is enforced at the orchestrator level using Pydantic. Responses that fail schema validation are rejected and the agent is re-prompted.
 
 ### Debate Loop
 
@@ -159,18 +147,15 @@ At termination, the Judge outputs either a `ConsensusVerdict` or a `BestArgument
 
 ## Layer 3: Evaluation and Reliability
 
-### Argument Quality Scorer
+### ReasonBench Evaluator (LLM-as-Judge)
 
-Each structured argument is scored independently by the Judge agent using a rubric-prompted LLM call:
+Each round's responses are scored by the Judge agent using task-specific Pydantic schemas. Scores are given on a strict 0–2 integer scale for explicit dimensions tailored to the task:
 
-| Dimension | Weight | What It Measures |
-|---|---|---|
-| **Logical Consistency** | 30% | Premises → conclusion validity; no internal contradictions |
-| **Evidence Support** | 30% | Fraction of claims backed by retrieved sources |
-| **Relevance** | 20% | Argument addresses the stated proposition, not a related but different claim |
-| **Completeness** | 20% | Engages with the opponent's strongest prior point |
+1. **Deterministic Logic:** Correctness, Logical Consistency, Completeness, Responsiveness
+2. **Strategic Reasoning:** Opponent Modeling, Strategic Coherence, Risk Awareness, Conditional Reasoning, Responsiveness
+3. **Constrained Tradeoff:** Constraint Utilization, Tradeoff Specificity, Assumptions Quality, Risk Analysis, Conditional Reasoning, Responsiveness
 
-Scores are in [0, 1]. The weighted composite score is stored per agent per round and fed to the Metrics Dashboard.
+The Judge is provided with the full prior-round context to accurately measure **Responsiveness** across iterations.
 
 ### Hallucination Detector
 
@@ -241,15 +226,13 @@ Per-session:
 ### Core Types (Python / Pydantic)
 
 ```python
-class Argument(BaseModel):
-    id: str                          # UUID
-    round: int
-    agent: Literal["proponent", "opponent", "judge"]
-    claim: str
-    evidence: List[EvidenceRef]
-    assumptions: List[str]
-    counterpoints_addressed: List[str]  # List of claim IDs
-    confidence_score: float          # [0, 1]
+class ReasonBenchResponse(BaseModel):
+    strategy_or_answer: str
+    rationale: str
+    assumptions: list[str]
+    opponent_model: str
+    risks: list[str]
+    conditions: list[str]
 
 class EvidenceRef(BaseModel):
     source_id: str
@@ -321,13 +304,12 @@ class Verdict(BaseModel):
 
 ## MVP vs. Future Scope
 
-### v1 (MVP)
+### v1 (ReasonBench MVP)
 - Proponent + Opponent + Judge agents
-- 3-round debate loop with structured argument format
-- Basic quality scoring (logical consistency + evidence support)
-- Hallucination detection (source existence check)
-- CLI or minimal web UI
-- FAISS vector index over user-provided documents
+- 3-round debate loop with `ReasonBenchResponse` output tracking
+- Task-specific rubrics on 0-2 scales (Logic, Strategy, Tradeoffs)
+- Per-round evaluation explicitly measuring "Responsiveness"
+- Automated runner for evaluating multiple models
 
 ### v2
 - Argument graph visualization (D3.js)
