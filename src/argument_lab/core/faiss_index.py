@@ -18,7 +18,6 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import os
 import pickle
 from dataclasses import dataclass

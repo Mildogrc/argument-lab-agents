@@ -12,11 +12,12 @@
 
 
 ## Tech stack
-- Backend: Python, FastAPI
-- Frontend: React, TypeScript
-- Database: PostgreSQL
+- Current implementation: Python, LangGraph, LangChain, FAISS, pytest
+- Planned backend: FastAPI
+- Planned frontend: React, TypeScript
+- Planned database: PostgreSQL
 - LLM orchestration: LangGraph
-- Tests: pytest, Vitest
+- Tests: pytest; Vitest only after a frontend is added
 
 ## Rules for AI coding agents
 - Do not make large rewrites unless explicitly requested.
@@ -29,8 +30,16 @@
 ## Commands
 - Install backend: `pip install -r requirements.txt`
 - Run backend tests: `pytest`
-- Run frontend tests: `npm test`
+- Run frontend tests: `npm test` after `package.json` exists
 - Run full verification: `./scripts/verify.sh`
+
+## Repository map
+- Architecture overview: `docs/architecture.md`
+- Current code design: `docs/design.md`
+- Development environment: `docs/dev_environment.md`
+- Testing and verification: `docs/testing.md`
+- Agent workflow: `docs/agent_workflow.md`
+- Harness readiness checklist: `docs/harness_readiness.md`
 
 ## After making changes
 

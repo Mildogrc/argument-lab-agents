@@ -278,33 +278,33 @@ def _render_markdown(p: dict) -> list[str]:
     w = lines.append  # shorthand
 
     # ── Header ────────────────────────────────────────────────────────────
-    w(f"# ArgumentLab Debate Report")
-    w(f"")
+    w("# ArgumentLab Debate Report")
+    w("")
     w(f"**Session:** `{p['session_id']}`  ")
     w(f"**Exported:** {p['exported_at']}  ")
     w(f"**Status:** {status_emoji}  ")
     w(f"**Rounds completed:** {p['rounds_completed']}  ")
-    w(f"")
-    w(f"---")
-    w(f"")
-    w(f"## Proposition")
-    w(f"")
+    w("")
+    w("---")
+    w("")
+    w("## Proposition")
+    w("")
     w(f"> {p['proposition']}")
-    w(f"")
+    w("")
 
     # ── Score Summary ──────────────────────────────────────────────────────
-    w(f"---")
-    w(f"")
-    w(f"## Score Summary")
-    w(f"")
+    w("---")
+    w("")
+    w("## Score Summary")
+    w("")
     traj = p.get("score_trajectories", {})
     rounds_list       = traj.get("rounds", [])
     prop_composites   = traj.get("proponent_composite", [])
     opp_composites    = traj.get("opponent_composite", [])
 
     if rounds_list:
-        w(f"| Round | Proponent (composite) | Opponent (composite) | Verdict |")
-        w(f"|---|---|---|---|")
+        w("| Round | Proponent (composite) | Opponent (composite) | Verdict |")
+        w("|---|---|---|---|")
         for r, pc, oc, round_data in zip(
             rounds_list,
             prop_composites,
@@ -318,39 +318,39 @@ def _render_markdown(p: dict) -> list[str]:
             elif judge.get("stalemate_detected"):
                 verdict = "⚖️ Stalemate"
             w(f"| {r} | {pc:.3f} | {oc:.3f} | {verdict} |")
-        w(f"")
+        w("")
 
     # ── Evaluation flags ───────────────────────────────────────────────────
-    w(f"---")
-    w(f"")
-    w(f"## Evaluation Flags")
-    w(f"")
+    w("---")
+    w("")
+    w("## Evaluation Flags")
+    w("")
     eval_data = p.get("evaluation", {})
-    w(f"| Metric | Count |")
-    w(f"|---|---|")
+    w("| Metric | Count |")
+    w("|---|---|")
     w(f"| Hallucination flags | {eval_data.get('hallucination_count', 0)} |")
     w(f"| Contradiction flags | {eval_data.get('contradiction_count', 0)} |")
     w(f"| Ignored claims      | {len(p.get('ignored_claims', []))} |")
     w(f"| Addressed claims    | {len(p.get('addressed_claims', []))} |")
-    w(f"")
+    w("")
 
     if eval_data.get("hallucination_flags"):
         w(f"**Hallucinated claim IDs:** `{'`, `'.join(eval_data['hallucination_flags'])}`")
-        w(f"")
+        w("")
     if eval_data.get("contradiction_flags"):
         w(f"**Contradicted claim IDs:** `{'`, `'.join(eval_data['contradiction_flags'])}`")
-        w(f"")
+        w("")
 
     # ── Round transcripts ──────────────────────────────────────────────────
-    w(f"---")
-    w(f"")
-    w(f"## Debate Transcript")
-    w(f"")
+    w("---")
+    w("")
+    w("## Debate Transcript")
+    w("")
 
     for round_data in p.get("rounds", []):
         r = round_data["round"]
         w(f"### Round {r}")
-        w(f"")
+        w("")
 
         for role in ("proponent", "opponent"):
             arg = round_data.get(role)
@@ -359,69 +359,69 @@ def _render_markdown(p: dict) -> list[str]:
             label = role.capitalize()
             confidence = arg["confidence_score"]
             w(f"#### {label}")
-            w(f"")
+            w("")
             w(f"**Claim** *(confidence: {confidence:.2f})*")
             w(f"> {arg['claim']}")
-            w(f"")
+            w("")
 
             if arg.get("evidence"):
-                w(f"**Evidence cited**")
+                w("**Evidence cited**")
                 for e in arg["evidence"]:
                     w(f"- `[{e['source_id']}]` (reliability: {e['reliability_score']:.2f})")
                     w(f"  > {e['excerpt']}")
-                w(f"")
+                w("")
 
             if arg.get("assumptions"):
-                w(f"**Assumptions**")
+                w("**Assumptions**")
                 for assumption in arg["assumptions"]:
                     w(f"- {assumption}")
-                w(f"")
+                w("")
 
             if arg.get("counterpoints_addressed"):
                 w(f"**Counterpoints addressed:** `{'`, `'.join(arg['counterpoints_addressed'])}`")
-                w(f"")
+                w("")
 
         # Judge evaluation for this round
         judge = round_data.get("judge")
         if judge:
             w(f"#### Judge Evaluation — Round {r}")
-            w(f"")
-            w(f"| Dimension | Proponent | Opponent |")
-            w(f"|---|---|---|")
+            w("")
+            w("| Dimension | Proponent | Opponent |")
+            w("|---|---|---|")
             p_b = judge["proponent"]
             o_b = judge["opponent"]
             for dim in ("logical_consistency", "evidence_support", "relevance", "completeness"):
                 label = dim.replace("_", " ").title()
                 w(f"| {label} | {p_b[dim]:.2f} | {o_b[dim]:.2f} |")
             w(f"| **Composite** | **{p_b['composite']:.3f}** | **{o_b['composite']:.3f}** |")
-            w(f"")
+            w("")
             w(f"**Judge's note:** {judge['explanation']}")
-            w(f"")
+            w("")
 
-        w(f"---")
-        w(f"")
+        w("---")
+        w("")
 
     # ── Confidence trajectories ────────────────────────────────────────────
-    w(f"## Agent Confidence Trajectories")
-    w(f"")
+    w("## Agent Confidence Trajectories")
+    w("")
     for agent, positions in p.get("agent_positions", {}).items():
         trajectory = " → ".join(f"{v:.2f}" for v in positions)
         w(f"- **{agent.capitalize()}:** {trajectory}")
-    w(f"")
+    w("")
 
     # ── Claim graph summary ────────────────────────────────────────────────
     graph = p.get("claim_graph", {})
     node_count = len(graph.get("nodes", []))
     edge_count = len(graph.get("edges", []))
-    w(f"---")
-    w(f"")
-    w(f"## Argument Graph")
-    w(f"")
+    w("---")
+    w("")
+    w("## Argument Graph")
+    w("")
     w(f"- **Total claims (nodes):** {node_count}")
     w(f"- **Challenged-by edges:** {edge_count}")
     w(f"- **Ignored claims:** {', '.join(p.get('ignored_claims', [])) or 'none'}")
-    w(f"")
-    w(f"*Full interactive graph available in the ArgumentLab dashboard.*")
-    w(f"")
+    w("")
+    w("*Full interactive graph available in the ArgumentLab dashboard.*")
+    w("")
 
     return lines

@@ -27,7 +27,6 @@ import argparse
 import os
 import sys
 import textwrap
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -300,7 +299,7 @@ def main() -> None:
     retriever = Retriever(index=faiss_index, top_k=args.top_k)
 
     # ── Build graph ────────────────────────────────────────────────────────
-    print(f"  Building debate graph...\n")
+    print("  Building debate graph...\n")
     debate_graph = build_graph(retriever)
 
     # ── Initial state ──────────────────────────────────────────────────────
@@ -361,7 +360,7 @@ def main() -> None:
     _print_summary(final_state)
 
     # ── Export ─────────────────────────────────────────────────────────────
-    print(f"  Exporting results...")
+    print("  Exporting results...")
     json_path, md_path = export_debate(
         state=final_state,
         session_id=session_id,

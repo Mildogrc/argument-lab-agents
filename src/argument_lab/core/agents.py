@@ -12,16 +12,14 @@ This guarantees that every Argument object contains grounded evidence
 before it ever reaches Pydantic validation.
 """
  
-import json
 import uuid
 from typing import Any
  
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
  
 from argument_lab.core.models import Argument, Claim, EvidenceRef
-from argument_lab.core.retriever import Retriever, RetrieverError
+from argument_lab.core.retriever import Retriever
 from argument_lab.core.state import DebateState, MAX_ROUNDS
 from argument_lab.core.prompts import (
     QUERY_FORMULATION_SYSTEM,
@@ -43,8 +41,38 @@ from argument_lab.core.prompts import (
  
 import os
 
-_llm = ChatOpenAI(model="gpt-4o", temperature=0.2, api_key=os.environ.get("OPENAI_API_KEY", "dummy"))
-_query_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0, api_key=os.environ.get("OPENAI_API_KEY", "dummy"))
+_llm: Any | None = None
+_query_llm: Any | None = None
+
+
+def _make_chat_openai(*, model: str, temperature: float) -> Any:
+    try:
+        from langchain_openai import ChatOpenAI
+    except ModuleNotFoundError as exc:
+        raise AgentError(
+            "langchain_openai is required for LLM-backed agent execution. "
+            "Install project dependencies with `pip install -r requirements.txt`."
+        ) from exc
+
+    return ChatOpenAI(
+        model=model,
+        temperature=temperature,
+        api_key=os.environ.get("OPENAI_API_KEY", "dummy"),
+    )
+
+
+def _get_generation_llm() -> Any:
+    global _llm
+    if _llm is None:
+        _llm = _make_chat_openai(model="gpt-4o", temperature=0.2)
+    return _llm
+
+
+def _get_query_llm() -> Any:
+    global _query_llm
+    if _query_llm is None:
+        _query_llm = _make_chat_openai(model="gpt-4o-mini", temperature=0.0)
+    return _query_llm
 
 
  
@@ -58,13 +86,14 @@ def _formulate_queries(
     stance: str,
     history: str,
     current_round: int,
-    llm: Any = _query_llm,
+    llm: Any | None = None,
 ) -> list[str]:
     """
     Step 1: Ask a lightweight LLM to produce search queries for this agent's
     next argument. Returns a list of query strings, falling back to the
     proposition itself if the LLM output cannot be parsed.
     """
+    llm = llm or _get_query_llm()
     prompt = ChatPromptTemplate.from_messages([
         ("system", QUERY_FORMULATION_SYSTEM),
         ("user", QUERY_FORMULATION_USER),
@@ -122,12 +151,13 @@ def _generate_argument(
     evidence_refs: list[EvidenceRef],
     evidence_context: str,
     argument_id: str,
-    llm: Any = _llm,
+    llm: Any | None = None,
 ) -> Argument:
     """
     Step 2: Generate the structured Argument using the retrieved evidence injected into the system prompt. Uses .with_structured_output() to
     enforce schema compliance at the LangChain layer.
     """
+    llm = llm or _get_generation_llm()
     structured_llm = llm.with_structured_output(Argument)
  
     system_prompt = AGENT_SYSTEM_TEMPLATE.format_map({
@@ -175,7 +205,7 @@ def _enforce_counterpoint_rule(
     current_round: int,
     prior_opponent_claim_ids: list[str],
     role: str,
-    llm: Any = _llm,
+    llm: Any | None = None,
     proposition: str = "",
     history: str = "",
     evidence_refs: list[EvidenceRef] = [],
@@ -203,6 +233,7 @@ def _enforce_counterpoint_rule(
         f"{prior_opponent_claim_ids}. Revise your argument to address "
         f"at least one of these claims directly."
     )
+    llm = llm or _get_generation_llm()
     structured_llm = llm.with_structured_output(Argument)
     prompt = ChatPromptTemplate.from_messages([
         ("system", AGENT_SYSTEM_TEMPLATE.format_map({
@@ -262,7 +293,6 @@ def _update_state_from_argument(
     - marks addressed and ignored claims
     """
     # Register the new claim
-    from argument_lab.core.models import Claim
     new_claim = Claim(
         id=argument.id,
         text=argument.claim,

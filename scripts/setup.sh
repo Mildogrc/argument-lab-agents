@@ -3,6 +3,17 @@ set -euo pipefail
 
 echo "Setting up project..."
 
+# Check for required tools
+if ! command -v python &> /dev/null; then
+  echo "Error: python is not installed or not in PATH." >&2
+  exit 1
+fi
+
+if ! command -v pip &> /dev/null; then
+  echo "Error: pip is not installed or not in PATH." >&2
+  exit 1
+fi
+
 # Python setup
 if [ -f "requirements.txt" ]; then
   echo "Installing Python dependencies..."

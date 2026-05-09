@@ -21,7 +21,6 @@ import os
 from typing import Any
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 
 from argument_lab.core.models import (
     Argument,
@@ -54,17 +53,38 @@ from argument_lab.core.eval_prompts import (
 # false positives.
 # ---------------------------------------------------------------------------
 
-_judge_llm = ChatOpenAI(
-    model="gpt-4o",
-    temperature=0.1,
-    api_key=os.environ.get("OPENAI_API_KEY", "dummy"),
-)
+_judge_llm: Any | None = None
+_checker_llm: Any | None = None
 
-_checker_llm = ChatOpenAI(
-    model="gpt-4o",
-    temperature=0.0,
-    api_key=os.environ.get("OPENAI_API_KEY", "dummy"),
-)
+
+def _make_chat_openai(*, model: str, temperature: float) -> Any:
+    try:
+        from langchain_openai import ChatOpenAI
+    except ModuleNotFoundError as exc:
+        raise EvaluationError(
+            "langchain_openai is required for LLM-backed evaluation execution. "
+            "Install project dependencies with `pip install -r requirements.txt`."
+        ) from exc
+
+    return ChatOpenAI(
+        model=model,
+        temperature=temperature,
+        api_key=os.environ.get("OPENAI_API_KEY", "dummy"),
+    )
+
+
+def _get_judge_llm() -> Any:
+    global _judge_llm
+    if _judge_llm is None:
+        _judge_llm = _make_chat_openai(model="gpt-4o", temperature=0.1)
+    return _judge_llm
+
+
+def _get_checker_llm() -> Any:
+    global _checker_llm
+    if _checker_llm is None:
+        _checker_llm = _make_chat_openai(model="gpt-4o", temperature=0.0)
+    return _checker_llm
 
 
 # ---------------------------------------------------------------------------
@@ -129,7 +149,7 @@ def judge_node(state: DebateState) -> dict:
 
     # JudgeEvaluation minus the `round` field — the LLM doesn't need to
     # infer it; we patch it in after.
-    structured_llm = _judge_llm.with_structured_output(JudgeEvaluation)
+    structured_llm = _get_judge_llm().with_structured_output(JudgeEvaluation)
     chain = prompt | structured_llm
 
     evaluation: JudgeEvaluation = chain.invoke({
@@ -191,7 +211,7 @@ def hallucination_check(state: DebateState) -> dict:
 def _check_hallucinations_for_arg(
     arg: Argument,
     proposition: str,
-    llm: Any = _checker_llm,
+    llm: Any | None = None,
 ) -> HallucinationReport:
     """
     Runs the hallucination check for a single argument. Returns a
@@ -201,6 +221,7 @@ def _check_hallucinations_for_arg(
         ("system", HALLUCINATION_SYSTEM),
         ("user", HALLUCINATION_USER),
     ])
+    llm = llm or _get_checker_llm()
     structured_llm = llm.with_structured_output(HallucinationReport)
     chain = prompt | structured_llm
 
@@ -263,7 +284,7 @@ def _check_contradictions_for_agent(
     prior_args: list[Argument],
     proposition: str,
     current_round: int,
-    llm: Any = _checker_llm,
+    llm: Any | None = None,
 ) -> ContradictionReport:
     """
     Runs the contradiction check for a single agent's current argument
@@ -273,6 +294,7 @@ def _check_contradictions_for_agent(
         ("system", CONTRADICTION_SYSTEM),
         ("user", CONTRADICTION_USER),
     ])
+    llm = llm or _get_checker_llm()
     structured_llm = llm.with_structured_output(ContradictionReport)
     chain = prompt | structured_llm
 

@@ -266,7 +266,7 @@ def main() -> None:
     index.save(INDEX_OUTPUT_PATH)
 
     print(f"\n[ingest] Done. Index saved to: {INDEX_OUTPUT_PATH}")
-    print(f"[ingest] Run a debate with: python setup/debate.py --proposition \"...\"")
+    print("[ingest] Run a debate with: python setup/debate.py --proposition \"...\"")
 
 
 if __name__ == "__main__":

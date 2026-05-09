@@ -1,6 +1,6 @@
 # ReasonBench (powered by ArgumentLab)
  
-**A multi-agent benchmark that conducts structured adversarial debates to quantitatively evaluate LLM reasoning quality, strategic consistency, and adaptability.**
+**A multi-agent benchmark that conducts structured adversarial debates to quantitatively evaluate LLM reasoning quality, strategic coherence, and adaptability.**
  
 Most AI benchmarks evaluate static question-answering. ReasonBench is built to *interrogate* models — forcing agents to construct structured strategies, defend them across debate rounds, explicitly state assumptions, and adapt to adversarial critiques. It is a rigorous framework for measuring how AI systems reason, disagree, and evolve their thinking.
  
@@ -8,15 +8,14 @@ Most AI benchmarks evaluate static question-answering. ReasonBench is built to *
  
 ## Why This Is Hard
  
-Getting an LLM to argue a position is trivial. Getting it to any of the following:
+Getting an LLM to argue a position is trivial. Getting it to:
  
 - maintain logical consistency across multiple rounds
 - cite grounded, verifiable evidence
 - respond specifically to an opponent's claims (not just re-assert its own)
 - detect when it is contradicting itself
 - converge toward a defensible conclusion under adversarial input
-
-ArgumentLab treats each of these as a measurable engineering problem.
+...is not. ArgumentLab treats each of these as a measurable engineering problem.
  
 ---
  
@@ -24,8 +23,8 @@ ArgumentLab treats each of these as a measurable engineering problem.
 
 ReasonBench currently evaluates reasoning across three core tasks, scored automatically by an LLM-as-Judge over a 3-round debate protocol:
 
-1. **Deterministic Logic (Constraint Puzzle):** Evaluates correctness, logical correctness, completeness, and responsiveness.
-2. **Strategic Reasoning (Asymmetric Game):** Evaluates opponent modeling, strategic consistency, risk awareness, conditional reasoning, and responsiveness.
+1. **Deterministic Logic (Constraint Puzzle):** Evaluates correctness, logical consistency, completeness, and responsiveness.
+2. **Strategic Reasoning (Asymmetric Game):** Evaluates opponent modeling, strategic coherence, risk awareness, conditional reasoning, and responsiveness.
 3. **Constrained Tradeoff Reasoning:** Evaluates constraint utilization, tradeoff specificity, explicit assumptions, risk analysis, and conditional reasoning.
 
 For full architectural details, see the [Architecture document](/docs/architecture.md).
@@ -67,7 +66,7 @@ This eliminates the "chatty LLM" failure mode and makes every output strictly sc
 Debates run across three rounds with increasing specificity:
  
 - **Round 1** — Initial arguments, top-level claims
-- **Round 2** — Targeted rebuttals; agents must respond to specific prior claims
+- **Round 2** — Targeted rebuttals; agents must address specific prior claims
 - **Round 3** — Refinement; agents update positions based on accumulated evidence
 Each agent receives the full prior-round context and is penalized (in scoring) for ignoring it.
  
@@ -140,51 +139,7 @@ Tracked across every debate session:
 - Contradiction frequency
 - Convergence round (or failure to converge)
 - Evidence citation rate
-- Disagreement persistence through rounds
----
- 
-## Getting Started
-
-### Prerequisites
-
-Ensure you have Python 3.10+ installed and set your OpenAI API key:
-
-```bash
-export OPENAI_API_KEY=sk-...
-```
-
-Install the dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-### 1. Ingest Data
-
-Before running a debate, the agents need a retrieval corpus (FAISS index). ArgumentLab includes a sample corpus to get started instantly:
-
-```bash
-python setup/ingest_corpus.py --sample
-```
-
-You can also ingest your own `.txt` or `.pdf` documents:
-
-```bash
-python setup/ingest_corpus.py --docs path/to/your/documents/
-```
-
-### 2. Run a Debate
-
-Execute a full, structured debate by providing a proposition. The debate streams live to the console, printing argument blocks and judge scores round-by-round.
-
-```bash
-python setup/debate.py \
-    --proposition "Companies should replace legacy infrastructure with AI-driven systems." \
-    --session-id my_debate_001
-```
-
-Once finished, the debate state is automatically exported to `local_data/results/my_debate_001.json` and a human-readable `my_debate_001.md` report.
-
+- Disagreement persistence across rounds
 ---
  
 ## Getting Started
@@ -275,7 +230,7 @@ Run all 3 benchmark tasks across 2 models and produce structured scores.
  
 ## How This Differs from Kialo
  
-[Kialo](https://www.kialo.com) is a platform for human-generated, community-refined argument trees — effectively structured Wikipedia for reasoning. It is an effective tool for its purpose.
+[Kialo](https://www.kialo.com) is a platform for human-generated, community-refined argument trees — effectively structured Wikipedia for reasoning. It is a valuable tool for its purpose.
  
 ArgumentLab is a different category entirely:
  
@@ -296,7 +251,7 @@ ArgumentLab is a different category entirely:
  
 ## Research Connections
  
-ArgumentLab is positioned to be at the intersection of several active research directions:
+ArgumentLab sits at the intersection of several active research directions:
  
 - **LLM-as-Judge** — using language models as evaluators of reasoning quality
 - **Multi-agent debate** — Du et al. (2023), *Improving Factuality and Reasoning in Language Models through Multiagent Debate*
@@ -312,6 +267,6 @@ ArgumentLab is positioned to be at the intersection of several active research d
  
 ## Author
  
-**Milind C** — MS Computer Science (Artificial Intelligence), Georgia Institute of Technology
+**Milind C** — MS Computer Science (Artifical Intelligence), Georgia Institute of Technology
 [LinkedIn](https://linkedin.com/in/milind-chandramohan) · [GitHub](https://github.com/mildogrc)
  
