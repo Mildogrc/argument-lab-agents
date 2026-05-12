@@ -15,7 +15,12 @@ external dependency required to compile the graph.
 from langgraph.graph import StateGraph, START, END
 
 from argument_lab.core.agents import make_proponent_node, make_opponent_node
-from argument_lab.core.evaluation import judge_node, hallucination_check, contradiction_check
+from argument_lab.core.evaluation import (
+    judge_node,
+    hallucination_check,
+    contradiction_check,
+    verdict_generator,
+)
 from argument_lab.core.retriever import Retriever
 from argument_lab.core.state import DebateState, MAX_ROUNDS
 
@@ -23,6 +28,7 @@ from argument_lab.core.state import DebateState, MAX_ROUNDS
 # ---------------------------------------------------------------------------
 # Non-LLM nodes
 # ---------------------------------------------------------------------------
+
 
 def start_round(state: DebateState) -> dict:
     """
@@ -44,6 +50,7 @@ def graph_update(state: DebateState) -> dict:
 # Routing
 # ---------------------------------------------------------------------------
 
+
 def route_round(state: DebateState) -> str:
     """
     Decides whether to loop back for another round or terminate.
@@ -59,15 +66,16 @@ def route_round(state: DebateState) -> str:
     """
     status = state.get("status", "in_progress")
     if status in ("converged", "stalemate", "terminated"):
-        return END
+        return "generate_verdict"
     if state.get("current_round", 1) > MAX_ROUNDS:
-        return END
+        return "generate_verdict"
     return "start_round"
 
 
 # ---------------------------------------------------------------------------
 # Graph factory
 # ---------------------------------------------------------------------------
+
 
 def build_graph(retriever: Retriever):
     """
@@ -109,7 +117,10 @@ def build_graph(retriever: Retriever):
     workflow.add_node("opponent", make_opponent_node(retriever))
 
     # Passthrough fan-in/fan-out between agent round and evaluation round
-    workflow.add_node("start_evaluation", lambda state: {"current_round": state.get("current_round", 1)})
+    workflow.add_node(
+        "start_evaluation",
+        lambda state: {"current_round": state.get("current_round", 1)},
+    )
 
     # Evaluation nodes — all three run in parallel
     workflow.add_node("judge", judge_node)
@@ -118,6 +129,9 @@ def build_graph(retriever: Retriever):
 
     # Final fan-in before routing decision
     workflow.add_node("graph_update", graph_update)
+
+    # Terminal node for synthesis
+    workflow.add_node("generate_verdict", verdict_generator)
 
     # --- Edge wiring ---
 
@@ -132,17 +146,20 @@ def build_graph(retriever: Retriever):
     workflow.add_edge("proponent", "start_evaluation")
     workflow.add_edge("opponent", "start_evaluation")
 
-    # Fan-out: judge, hallucination check, and contradiction check run in parallel
-    workflow.add_edge("start_evaluation", "judge")
+    # Fan-out: checkers run in parallel before the judge scores the round.
     workflow.add_edge("start_evaluation", "hallucination_check")
     workflow.add_edge("start_evaluation", "contradiction_check")
 
-    # Fan-in: all three evaluation nodes must complete before graph_update
+    # Fan-in: all checkers must complete before judge (to apply penalties)
+    workflow.add_edge("hallucination_check", "judge")
+    workflow.add_edge("contradiction_check", "judge")
+
+    # Fan-in: judge completes the round
     workflow.add_edge("judge", "graph_update")
-    workflow.add_edge("hallucination_check", "graph_update")
-    workflow.add_edge("contradiction_check", "graph_update")
 
     # Conditional routing: loop or terminate
     workflow.add_conditional_edges("graph_update", route_round)
+
+    workflow.add_edge("generate_verdict", END)
 
     return workflow.compile()

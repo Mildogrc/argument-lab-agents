@@ -45,16 +45,21 @@ from argument_lab.core.faiss_index import ChunkRecord, FaissIndex
 # Constants
 # ---------------------------------------------------------------------------
 
-SAMPLE_CORPUS_PATH = Path(__file__).resolve().parent.parent / "local_data" / "sample_corpus.json"
-INDEX_OUTPUT_PATH  = Path(__file__).resolve().parent.parent / "local_data" / "faiss_index"
+SAMPLE_CORPUS_PATH = (
+    Path(__file__).resolve().parent.parent / "local_data" / "sample_corpus.json"
+)
+INDEX_OUTPUT_PATH = (
+    Path(__file__).resolve().parent.parent / "local_data" / "faiss_index"
+)
 
-CHUNK_SIZE    = 400   # target characters per chunk
-CHUNK_OVERLAP = 80    # character overlap between adjacent chunks
+CHUNK_SIZE = 400  # target characters per chunk
+CHUNK_OVERLAP = 80  # character overlap between adjacent chunks
 
 
 # ---------------------------------------------------------------------------
 # Chunking
 # ---------------------------------------------------------------------------
+
 
 def chunk_text(text: str, source_id_prefix: str) -> list[ChunkRecord]:
     """
@@ -76,11 +81,13 @@ def chunk_text(text: str, source_id_prefix: str) -> list[ChunkRecord]:
 
         # Don't create a chunk that's just whitespace or too short to be useful
         if len(excerpt) >= 40:
-            chunks.append(ChunkRecord(
-                source_id=f"{source_id_prefix}_chunk_{chunk_idx:03d}",
-                excerpt=excerpt,
-                doc_title=source_id_prefix,
-            ))
+            chunks.append(
+                ChunkRecord(
+                    source_id=f"{source_id_prefix}_chunk_{chunk_idx:03d}",
+                    excerpt=excerpt,
+                    doc_title=source_id_prefix,
+                )
+            )
             chunk_idx += 1
 
         start = end - CHUNK_OVERLAP  # overlap for context continuity
@@ -91,6 +98,7 @@ def chunk_text(text: str, source_id_prefix: str) -> list[ChunkRecord]:
 # ---------------------------------------------------------------------------
 # Sample corpus loader
 # ---------------------------------------------------------------------------
+
 
 def load_sample_corpus() -> list[ChunkRecord]:
     """
@@ -113,19 +121,24 @@ def load_sample_corpus() -> list[ChunkRecord]:
         # Sanitise title for use as a source_id prefix
         prefix = f"doc_{doc_idx:03d}"
         for chunk_idx, excerpt in enumerate(doc.get("chunks", [])):
-            records.append(ChunkRecord(
-                source_id=f"{prefix}_chunk_{chunk_idx:03d}",
-                excerpt=excerpt.strip(),
-                doc_title=title,
-            ))
+            records.append(
+                ChunkRecord(
+                    source_id=f"{prefix}_chunk_{chunk_idx:03d}",
+                    excerpt=excerpt.strip(),
+                    doc_title=title,
+                )
+            )
 
-    print(f"[ingest] Sample corpus: {len(documents)} documents → {len(records)} chunks")
+    print(
+        f"[ingest] Sample corpus: {len(documents)} documents -> {len(records)} chunks"
+    )
     return records
 
 
 # ---------------------------------------------------------------------------
 # Real document loader
 # ---------------------------------------------------------------------------
+
 
 def load_docs_folder(docs_path: Path) -> list[ChunkRecord]:
     """
@@ -156,7 +169,7 @@ def load_docs_folder(docs_path: Path) -> list[ChunkRecord]:
         records.extend(file_chunks)
         print(f"[ingest] {filepath.name}: {len(file_chunks)} chunks")
 
-    print(f"[ingest] User docs: {len(files)} files → {len(records)} chunks")
+    print(f"[ingest] User docs: {len(files)} files -> {len(records)} chunks")
     return records
 
 
@@ -174,9 +187,7 @@ def _extract_text(filepath: Path) -> str:
             )
             return ""
         reader = PdfReader(str(filepath))
-        return "\n".join(
-            page.extract_text() or "" for page in reader.pages
-        )
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
 
     return ""
 
@@ -184,6 +195,7 @@ def _extract_text(filepath: Path) -> str:
 # ---------------------------------------------------------------------------
 # Deduplication
 # ---------------------------------------------------------------------------
+
 
 def deduplicate(records: list[ChunkRecord]) -> list[ChunkRecord]:
     """
@@ -207,16 +219,19 @@ def deduplicate(records: list[ChunkRecord]) -> list[ChunkRecord]:
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build the ArgumentLab FAISS retrieval index.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.dedent("""
+        epilog=textwrap.dedent(
+            """
         Examples:
           python setup/ingest_corpus.py --sample
           python setup/ingest_corpus.py --docs ./my_documents/
           python setup/ingest_corpus.py --sample --docs ./my_documents/
-        """),
+        """
+        ),
     )
     parser.add_argument(
         "--sample",
@@ -266,7 +281,7 @@ def main() -> None:
     index.save(INDEX_OUTPUT_PATH)
 
     print(f"\n[ingest] Done. Index saved to: {INDEX_OUTPUT_PATH}")
-    print("[ingest] Run a debate with: python setup/debate.py --proposition \"...\"")
+    print('[ingest] Run a debate with: python setup/debate.py --proposition "..."')
 
 
 if __name__ == "__main__":
