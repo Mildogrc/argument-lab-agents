@@ -1,8 +1,8 @@
-# ArgumentLab
+# ReasonBench (powered by ArgumentLab)
  
-**A multi-agent reasoning system that conducts structured debates and quantitatively evaluates argument quality, consistency, and hallucination under adversarial conditions.**
+**A multi-agent benchmark that conducts structured adversarial debates to quantitatively evaluate LLM reasoning quality, strategic coherence, and adaptability.**
  
-Most AI systems are built to answer questions. ArgumentLab is built to *interrogate them* — forcing agents to construct structured arguments, defend them across debate rounds, cite real evidence, and withstand adversarial pressure. The goal is not a better chatbot. It is a rigorous framework for studying how AI systems reason, disagree, and fail.
+Most AI benchmarks evaluate static question-answering. ReasonBench is built to *interrogate* models — forcing agents to construct structured strategies, defend them across debate rounds, explicitly state assumptions, and adapt to adversarial critiques. It is a rigorous framework for measuring how AI systems reason, disagree, and evolve their thinking.
  
 ---
  
@@ -19,9 +19,15 @@ Getting an LLM to argue a position is trivial. Getting it to:
  
 ---
  
-## Architecture Overview
- 
-Refer to [Architecture document](/docs/architecture.md)
+## The ReasonBench Evaluation Suite
+
+ReasonBench currently evaluates reasoning across three core tasks, scored automatically by an LLM-as-Judge over a 3-round debate protocol:
+
+1. **Deterministic Logic (Constraint Puzzle):** Evaluates correctness, logical consistency, completeness, and responsiveness.
+2. **Strategic Reasoning (Asymmetric Game):** Evaluates opponent modeling, strategic coherence, risk awareness, conditional reasoning, and responsiveness.
+3. **Constrained Tradeoff Reasoning:** Evaluates constraint utilization, tradeoff specificity, explicit assumptions, risk analysis, and conditional reasoning.
+
+For full architectural details, see the [Architecture document](/docs/architecture.md).
  
 ---
  
@@ -38,21 +44,22 @@ Four agents drive the system:
 | **Judge** | Evaluates argument quality and detects convergence |
 | **Moderator** *(optional)* | Enforces debate structure and prevents drift |
  
-### Structured Argument Format
+### Structured ReasonBench Format
  
-Agents do not produce free text. Every argument is a structured object:
+Agents do not produce free text. Every response is a structured object:
  
 ```json
 {
-  "claim": "...",
-  "evidence": ["source_1", "source_2"],
-  "assumptions": ["..."],
-  "counterpoints_addressed": ["..."],
-  "confidence_score": 0.82
+  "strategy_or_answer": "Final answer or plan...",
+  "rationale": "Step-by-step reasoning...",
+  "assumptions": ["Explicit assumptions made..."],
+  "opponent_model": "What the model believes about the opponent...",
+  "risks": ["Failure modes or weaknesses..."],
+  "conditions": ["When the answer/strategy would change..."]
 }
 ```
  
-This eliminates the "chatty LLM" failure mode and makes every output machine-evaluable.
+This eliminates the "chatty LLM" failure mode and makes every output strictly scorable against the benchmark rubrics.
  
 ### Iterative Debate Loop
  
@@ -202,25 +209,23 @@ Once finished, the debate state is automatically exported to `local_data/results
  
 ---
  
-## MVP Scope
+## MVP Scope (ReasonBench)
  
-**Must-have (v1):**
+**Target Goal:**
+Run all 3 benchmark tasks across 2 models and produce structured scores.
+
+**Current Features (Iteration 1):**
 - Proponent + Opponent + Judge agents
-- Structured argument format (claim, evidence, confidence)
+- Structured `ReasonBenchResponse` format
 - 3-round debate loop with context tracking
-- Basic scoring — logical consistency + evidence support
-- CLI or minimal web UI
-**v2 additions:**
-- Argument graph visualization
-- Hallucination detection pipeline
-- Metrics dashboard
-- RAG-based evidence integration
-**Stretch goals:**
-- Human-in-the-loop intervention
-- Adversarial injection testing suite
-- Strategy modes (aggressive / evidence-first / exploratory)
-- Multi-agent expansion (domain expert, skeptic, data-driven agents)
-- Session history and longitudinal improvement tracking
+- Task-specific scoring logic (0-2 scales mapping directly to the 3 task rubrics)
+- `evaluate_reasonbench_round()` explicitly tracking **Responsiveness** across rounds.
+
+**Next Steps (Iteration 2+):**
+- Migrate agent logic to output the new ReasonBench schema
+- Wire the ReasonBench evaluator natively into the LangGraph state
+- Add automated runner to benchmark multiple models at once
+- Metrics dashboard / machine-readable score reports
 ---
  
 ## How This Differs from Kialo
