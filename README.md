@@ -1,272 +1,120 @@
-# ReasonBench (powered by ArgumentLab)
- 
-**A multi-agent benchmark that conducts structured adversarial debates to quantitatively evaluate LLM reasoning quality, strategic coherence, and adaptability.**
- 
-Most AI benchmarks evaluate static question-answering. ReasonBench is built to *interrogate* models — forcing agents to construct structured strategies, defend them across debate rounds, explicitly state assumptions, and adapt to adversarial critiques. It is a rigorous framework for measuring how AI systems reason, disagree, and evolve their thinking.
- 
----
- 
-## Why This Is Hard
- 
-Getting an LLM to argue a position is trivial. Getting it to:
- 
-- maintain logical consistency across multiple rounds
-- cite grounded, verifiable evidence
-- respond specifically to an opponent's claims (not just re-assert its own)
-- detect when it is contradicting itself
-- converge toward a defensible conclusion under adversarial input
-...is not. ArgumentLab treats each of these as a measurable engineering problem.
- 
----
- 
-## The ReasonBench Evaluation Suite
+# ReasonBench
 
-ReasonBench currently evaluates reasoning across three core tasks, scored automatically by an LLM-as-Judge over a 3-round debate protocol:
+**Benchmarking reasoning improvement in small language models through critique and debate.**
 
-1. **Deterministic Logic (Constraint Puzzle):** Evaluates correctness, logical consistency, completeness, and responsiveness.
-2. **Strategic Reasoning (Asymmetric Game):** Evaluates opponent modeling, strategic coherence, risk awareness, conditional reasoning, and responsiveness.
-3. **Constrained Tradeoff Reasoning:** Evaluates constraint utilization, tradeoff specificity, explicit assumptions, risk analysis, and conditional reasoning.
+ReasonBench evaluates how much reasoning capability can be extracted from small language models through structured critique, self-reflection, and adversarial debate. Debate is not the product; it is a stress mechanism for reasoning. The goal is to measure whether smaller local/open models can improve their answers after being challenged, revised, or judged.
 
-For full architectural details, see the [Architecture document](/docs/architecture.md).
- 
----
- 
-## Layer 1: Core Reasoning Engine
- 
-### Multi-Agent Architecture
- 
-Four agents drive the system:
- 
-| Agent | Role |
-|---|---|
-| **Proponent** | Argues FOR the proposition |
-| **Opponent** | Argues AGAINST the proposition |
-| **Judge** | Evaluates argument quality and detects convergence |
-| **Moderator** *(optional)* | Enforces debate structure and prevents drift |
- 
-### Structured ReasonBench Format
- 
-Agents do not produce free text. Every response is a structured object:
- 
-```json
-{
-  "strategy_or_answer": "Final answer or plan...",
-  "rationale": "Step-by-step reasoning...",
-  "assumptions": ["Explicit assumptions made..."],
-  "opponent_model": "What the model believes about the opponent...",
-  "risks": ["Failure modes or weaknesses..."],
-  "conditions": ["When the answer/strategy would change..."]
-}
-```
- 
-This eliminates the "chatty LLM" failure mode and makes every output strictly scorable against the benchmark rubrics.
- 
-### Iterative Debate Loop
- 
-Debates run across three rounds with increasing specificity:
- 
-- **Round 1** — Initial arguments, top-level claims
-- **Round 2** — Targeted rebuttals; agents must address specific prior claims
-- **Round 3** — Refinement; agents update positions based on accumulated evidence
-Each agent receives the full prior-round context and is penalized (in scoring) for ignoring it.
- 
-### Memory and Context Tracking
- 
-A shared debate state tracks:
-- all claims made across rounds
-- which claims have been addressed vs. ignored
-- agent position drift over time
-- repetition detection
----
- 
-## Layer 2: Debate System
- 
-### Topic Input and Framing
- 
-The user provides a question and optional supporting documents. The system converts this into a formal debate proposition with scoped constraints, ensuring agents argue the same thing rather than talking past each other.
- 
-### Evidence Integration
- 
-This is the key technical differentiator. Agents are not allowed to assert facts — they must retrieve them. Evidence is pulled via RAG over user-provided documents or curated corpora. Each claim is linked to a source, and source reliability is tracked as a first-class metric.
- 
-### Convergence Detection
- 
-The Judge agent continuously monitors for:
-- **Agreement zones** — claims both agents accept
-- **Unresolved conflicts** — positions neither agent concedes
-- **Stalemates** — rounds where neither argument quality score improves
-At termination, the Judge produces either a synthesized consensus or a ranked "best argument so far" with an explanation of what remained unresolved.
- 
----
- 
-## Layer 3: Evaluation and Reliability
- 
-This layer is what separates ArgumentLab from a demo.
- 
-### Argument Quality Scoring
- 
-Each argument is scored across four dimensions:
- 
-| Dimension | What It Measures |
-|---|---|
-| **Logical Consistency** | Does the argument follow from its premises? |
-| **Evidence Support** | Are claims backed by retrieved sources? |
-| **Relevance** | Does the argument address the actual proposition? |
-| **Completeness** | Does it engage with the opponent's strongest points? |
- 
-### Hallucination Detection
- 
-The system checks whether cited sources exist, whether their content supports the stated claim, and whether specific facts (names, numbers, dates) are grounded in the retrieved evidence. Hallucination rate is tracked as a per-agent, per-round metric.
- 
-### Contradiction Detection
- 
-Agents are compared against their own prior arguments. If an agent's Round 3 position is logically inconsistent with its Round 1 claims, this is flagged, scored, and surfaced in the metrics dashboard. Ignoring an opponent's argument is also penalized.
- 
-### Adversarial Testing
- 
-ArgumentLab includes a controlled evaluation mode that injects:
-- **Misleading data** — plausible but false evidence
-- **Incomplete context** — information gaps that require inference
-- **Conflicting evidence** — sources that contradict each other
-This stress-tests agent robustness and produces behavioral profiles under degraded conditions.
- 
-### Metrics Dashboard
- 
-Tracked across every debate session:
- 
-- Argument quality score per agent per round
-- Hallucination rate
-- Contradiction frequency
-- Convergence round (or failure to converge)
-- Evidence citation rate
-- Disagreement persistence across rounds
----
- 
-## Getting Started
+## Core Research Question
 
-### Prerequisites
+Do small language models improve their reasoning quality after critique, self-reflection, or adversarial interaction?
 
-Ensure you have Python 3.10+ installed and set your OpenAI API key:
+ReasonBench replaces the question "Which model wins the debate?" with a more useful benchmark target: how much a model's reasoning improves from its initial answer to its final answer under controlled protocols.
 
-```bash
-export OPENAI_API_KEY=sk-...
+## Main Motivation
+
+- SLMs are increasingly capable and popular.
+- Local inference makes large-scale testing cheap.
+- Only judging may require a stronger LLM API call.
+- This enables many trials, seeds, ablations, and model comparisons.
+- The result is more interesting than another GPT/Claude benchmark.
+
+## Benchmark Protocols
+
+ReasonBench should support four protocol modes over the same task set:
+
+1. **Baseline:** The model answers once with no critique or revision.
+2. **Self-critique:** The model answers, critiques its own reasoning, then revises.
+3. **Debate:** Two agents argue opposing views, then each revises.
+4. **Debate + judge:** Debate is followed by external judge scoring and structured feedback.
+
+Each mode should capture the initial answer, intermediate critique or interaction trace, final answer, and scoring metadata so improvement can be measured directly.
+
+## Models
+
+ReasonBench should be local-first, with model adapters for Ollama, llama.cpp, and HuggingFace. API-backed frontier models can still be used as optional judges or comparison baselines, but they are no longer the primary benchmark target.
+
+Suggested model families:
+
+- Qwen small models
+- Gemma small models
+- Phi models
+- Llama 8B-class models
+- Mistral/Ministral-class models
+
+## Tasks
+
+The benchmark keeps the original three task categories, adapted for SLM-scale reasoning evaluation:
+
+- **Deterministic logic:** Constraint puzzles, symbolic consistency, and answer-verifiable reasoning.
+- **Strategic reasoning:** Asymmetric games, opponent modeling, conditional plans, and risk-sensitive choices.
+- **Tradeoff reasoning:** Multi-constraint decisions where the model must expose assumptions, compare options, and justify tradeoffs.
+
+Future categories:
+
+- contradiction detection
+- uncertainty calibration
+- planning under constraints
+- prompt perturbation stability
+
+## Metrics
+
+ReasonBench should score both the first answer and the final answer, then report improvement.
+
+Tracked metrics:
+
+- initial reasoning quality
+- final reasoning quality
+- improvement delta
+- contradiction rate
+- consistency
+- risk awareness
+- responsiveness to critique
+- structured JSON compliance
+
+Main metric:
+
+```text
+Reasoning Improvement Rate = final_score - initial_score
 ```
 
-Install the dependencies:
+The benchmark should also report per-model distributions across tasks, seeds, protocols, and prompt variants rather than relying on single-run scores.
 
-```bash
-pip install -r requirements.txt
-```
+## Cost Strategy
 
-### 1. Ingest Data
+Most computation should run through local SLM inference, making large batches of trials, seeds, ablations, and model comparisons inexpensive. Stronger LLM judge calls are optional and should use minimal prompts, compact scoring rubrics, and cached results keyed by task, model output, protocol, and judge version.
 
-Before running a debate, the agents need a retrieval corpus (FAISS index). ArgumentLab includes a sample corpus to get started instantly:
+ReasonBench should also support human or evaluator rubrics so API judging is not required. This allows fully local benchmark runs, mixed human/LLM evaluation, and reproducible score audits.
 
-```bash
-python setup/ingest_corpus.py --sample
-```
+## Repository Plan
 
-You can also ingest your own `.txt` or `.pdf` documents:
+Planned project structure:
 
-```bash
-python setup/ingest_corpus.py --docs path/to/your/documents/
-```
+- **reasonbench-core:** orchestration, model adapters, agents, and benchmark protocols
+- **reasonbench-tasks:** public benchmark tasks, task schemas, fixtures, and prompt variants
+- **reasonbench-evals:** scoring rubrics, judge prompts, metric calculators, and score reports
+- **reasonbench-ui:** optional visualization dashboard for protocol traces and score comparisons
+- **private advanced evals:** hidden tests, adversarial tasks, and leaderboard protection
 
-### 2. Run a Debate
+## Implementation Roadmap
 
-Execute a full, structured debate by providing a proposition. The debate streams live to the console, printing argument blocks and judge scores round-by-round.
+1. Define shared task, response, protocol trace, and score schemas.
+2. Add local model adapters for Ollama first, then llama.cpp and HuggingFace.
+3. Implement baseline and self-critique runners.
+4. Adapt the existing debate loop into a protocol module, keeping debate as a measurement stressor.
+5. Add judge scoring with cacheable outputs and human-rubric fallback.
+6. Build batch evaluation across models, seeds, tasks, and protocols.
+7. Generate machine-readable reports with improvement deltas and protocol comparisons.
+8. Add optional dashboard views for traces, score distributions, and failure examples.
 
-```bash
-python setup/debate.py \
-    --proposition "Companies should replace legacy infrastructure with AI-driven systems." \
-    --session-id my_debate_001
-```
+## Definition of Done for MVP
 
-Once finished, the debate state is automatically exported to `local_data/results/my_debate_001.json` and a human-readable `my_debate_001.md` report.
+- Run all three core task categories across at least two local SLMs.
+- Compare baseline, self-critique, debate, and debate + judge protocols.
+- Produce initial score, final score, and Reasoning Improvement Rate for every run.
+- Track contradiction rate, consistency, risk awareness, responsiveness to critique, and JSON compliance.
+- Export reproducible JSON/CSV reports suitable for README results tables and resume discussion.
 
----
- 
-## Demo Flow
- 
-1. Input a real-world question (e.g., *"Should companies replace legacy infrastructure with AI-driven systems?"*)
-2. Watch structured debate rounds with per-argument scoring
-3. Explore the argument graph — claims, rebuttals, ignored threads
-4. Review the metrics dashboard — quality trends, hallucination flags, contradiction alerts
-5. Read the Judge's synthesis — consensus reached, or best-argument verdict with unresolved conflicts
----
- 
-## Tech Stack
- 
-| Component | Technology |
-|---|---|
-| Agent orchestration | LangGraph / custom agent loop |
-| LLM backbone | OpenAI GPT-4o / Claude (via API) |
-| Evidence retrieval | RAG with FAISS or ChromaDB |
-| Argument scoring | Structured LLM-as-judge with rubric prompting |
-| Argument graph | NetworkX (backend), D3.js (frontend) |
-| Metrics dashboard | Streamlit or React + Recharts |
-| Backend | FastAPI |
- 
----
- 
-## MVP Scope (ReasonBench)
- 
-**Target Goal:**
-Run all 3 benchmark tasks across 2 models and produce structured scores.
+## Resume Positioning
 
-**Current Features (Iteration 1):**
-- Proponent + Opponent + Judge agents
-- Structured `ReasonBenchResponse` format
-- 3-round debate loop with context tracking
-- Task-specific scoring logic (0-2 scales mapping directly to the 3 task rubrics)
-- `evaluate_reasonbench_round()` explicitly tracking **Responsiveness** across rounds.
+Built ReasonBench, a local-first benchmark framework for measuring reasoning improvement in small language models under critique, self-reflection, and adversarial debate.
 
-**Next Steps (Iteration 2+):**
-- Migrate agent logic to output the new ReasonBench schema
-- Wire the ReasonBench evaluator natively into the LangGraph state
-- Add automated runner to benchmark multiple models at once
-- Metrics dashboard / machine-readable score reports
----
- 
-## How This Differs from Kialo
- 
-[Kialo](https://www.kialo.com) is a platform for human-generated, community-refined argument trees — effectively structured Wikipedia for reasoning. It is a valuable tool for its purpose.
- 
-ArgumentLab is a different category entirely:
- 
-| | Kialo | ArgumentLab |
-|---|---|---|
-| Arguments | Human-written | AI-generated |
-| Debate | Static tree | Multi-round, iterative |
-| Self-critique | No | Yes |
-| Evidence grounding | No | Yes (RAG + citation) |
-| Scoring / evaluation | No | Yes (multi-dimensional) |
-| Hallucination detection | No | Yes |
-| Adversarial testing | No | Yes |
-| Convergence mechanism | No | Yes |
- 
-> Kialo organizes human arguments. ArgumentLab studies how AI systems reason, fail, and improve.
- 
----
- 
-## Research Connections
- 
-ArgumentLab sits at the intersection of several active research directions:
- 
-- **LLM-as-Judge** — using language models as evaluators of reasoning quality
-- **Multi-agent debate** — Du et al. (2023), *Improving Factuality and Reasoning in Language Models through Multiagent Debate*
-- **Constitutional AI / self-critique** — agents that evaluate and revise their own outputs
-- **Adversarial robustness** — measuring agent behavior under distributional shift
----
- 
-## Project Status
- 
-🚧 In development — contributions and feedback welcome.
- 
----
- 
-## Author
- 
-**Milind C** — MS Computer Science (Artifical Intelligence), Georgia Institute of Technology
-[LinkedIn](https://linkedin.com/in/milind-chandramohan) · [GitHub](https://github.com/mildogrc)
- 
